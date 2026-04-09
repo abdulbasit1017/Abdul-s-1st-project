@@ -4,3 +4,4 @@ from django.db import models
 class Product(models.Model):
     title = models.CharField()
     price = models.IntegerField() 
+    description = models.TextField(null=True, blank=True)
