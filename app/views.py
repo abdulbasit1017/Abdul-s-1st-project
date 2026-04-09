@@ -34,8 +34,8 @@ class ProductAPI(APIView):
         max_price = request.GET.get('max_price')
         if min_price is not None and max_price is not None:
             try:
-                min_price = float(min_price)
-                max_price = float(max_price)
+                min_price = int(min_price)
+                max_price = int(max_price)
             except ValueError:
                 return Response({'error': 'Invalid price range'}, status=400)
             
@@ -82,6 +82,8 @@ class ProductAPI(APIView):
             return Response (serializer.errors, status=400)
         
         return Response({'error': 'Product ID required for patch'}, status=400)
-
-        
     
+    def delete(self, request, id):
+        product = get_object_or_404(Product, id=id)
+        product.delete()
+        return Response ({'message': 'Congratulations Product deleted successfully !'},status=status.HTTP_204_NO_CONTENT)
