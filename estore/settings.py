@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-test-key-123'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG=True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -121,3 +121,5 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# for production
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'abdulbasit56.pythonanywhere.com']
