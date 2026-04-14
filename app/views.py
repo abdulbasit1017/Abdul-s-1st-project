@@ -96,33 +96,31 @@ class ProductAPI(APIView):
             serializer = ProductSerializer(product)
             return Response(serializer.data)
 
-        # 🔥 CATEGORY FILTER
+        # GET FILTER PARAMS
         category_id = request.GET.get('category')
-        if category_id:
-            products = Product.objects.filter(category_id=category_id)
-            serializer = ProductSerializer(products, many=True)
-            return Response(serializer.data)
-
-        # PRICE FILTER
         min_price = request.GET.get('min_price')
         max_price = request.GET.get('max_price')
 
+        # START QUERY
+        products = Product.objects.all()
+
+        # 🔥 CATEGORY FILTER
+        if category_id:
+            products = products.filter(category_id=category_id)
+
+        # 💰 PRICE FILTER
         if min_price and max_price:
             try:
                 min_price = int(min_price)
                 max_price = int(max_price)
+
+                products = products.filter(
+                    price__gte=min_price,
+                    price__lte=max_price
+                )
             except ValueError:
                 return Response({'error': 'Invalid price range'}, status=400)
 
-            products = Product.objects.filter(
-                price__gte=min_price,
-                price__lte=max_price
-            )
-            serializer = ProductSerializer(products, many=True)
-            return Response(serializer.data)
-
-        # ALL PRODUCTS
-        products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
