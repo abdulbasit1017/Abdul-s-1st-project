@@ -2,28 +2,55 @@
 
 {% block content %}
 
-<h2 class="mb-4">Products</h2>
+<h2 class="mb-4 fw-bold">Products</h2>
 
 <div class="row">
 
     {% for product in products %}
 
-    <div class="col-md-4">
-        <div class="card mb-4">
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
 
+        <div class="card h-100">
+
+            <!-- IMAGE (safe check) -->
+            {% if product.image %}
             <img src="{{ product.image.url }}" class="card-img-top">
+            {% else %}
+            <img src="https://via.placeholder.com/300x200" class="card-img-top">
+            {% endif %}
 
-            <div class="card-body">
-                <h5 class="card-title">{{ product.name }}</h5>
-                <p class="card-text">{{ product.description|truncatewords:10 }}</p>
-                <h6>Rs {{ product.price }}</h6>
+            <div class="card-body d-flex flex-column">
 
-                <a href="/product/{{ product.id }}/" class="btn btn-primary">
+                <!-- TITLE -->
+                <h5 class="card-title">
+                    {{ product.name|default:"No Name" }}
+                </h5>
+
+                <!-- DESCRIPTION -->
+                <p class="card-text text-muted">
+                    {{ product.description|default:""|truncatewords:12 }}
+                </p>
+
+                <!-- PRICE -->
+                <h6 class="text-success fw-bold">
+                    Rs {{ product.price|default:"0" }}
+                </h6>
+
+                <!-- BUTTON -->
+                <a href="/product/{{ product.id }}/" class="btn btn-primary mt-auto">
                     View Detail
                 </a>
+
             </div>
 
         </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="col-12 text-center">
+        <p class="text-muted">No products found</p>
     </div>
 
     {% endfor %}

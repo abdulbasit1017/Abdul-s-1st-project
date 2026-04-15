@@ -10,7 +10,8 @@ from .serializers import ProductSerializer, CategorySerializer
 # =========================
 # 🟢 FRONTEND VIEWS
 # =========================
-
+def cart_page(request):
+    return render(request, "cart.html")
 # 🏠 HOME PAGE (CATEGORIES SHOW)
 def home_page(request):
     categories = Category.objects.all()
@@ -21,15 +22,14 @@ def home_page(request):
 def category_page(request, slug):
     category = get_object_or_404(Category, slug=slug)
 
-    # 🔥 SAME FILTER LOGIC (LIKE API)
     products = Product.objects.filter(category=category)
 
-    # 🔍 SEARCH (frontend)
+    # 🔍 SEARCH
     search = request.GET.get('search')
     if search:
         products = products.filter(title__icontains=search)
 
-    # 💰 PRICE FILTER (frontend)
+    # 💰 PRICE FILTER
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
 
@@ -46,6 +46,12 @@ def category_page(request, slug):
         'category': category,
         'products': products
     })
+
+
+# 🔥 PRODUCT DETAIL PAGE (FIXED)
+def product_detail(request, pk):
+    product = get_object_or_404(Product, id=pk)
+    return render(request, "product_detail.html", {"product": product})
 
 
 # =========================
