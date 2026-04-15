@@ -13,7 +13,7 @@
         <p>{{ product.description }}</p>
         <h4>Rs {{ product.price }}</h4>
 
-        <button class="btn btn-success" onclick="addToCart({{ product.id }})">
+        <button class="btn btn-success" data-id="{{ product.id }}" onclick="addToCart(this)">
             Add to Cart
         </button>
     </div>
