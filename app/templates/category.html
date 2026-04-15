@@ -19,10 +19,10 @@
             {% for product in products %}
             <div class="col-md-3 col-sm-6 col-12 mb-4">
 
-                <div class="card h-100 w-80 shadow-sm">
+                <div class="card h-100 shadow-sm">
 
                     {% if product.image %}
-                    <img src="{{ product.image.url }}" class="card-img-top" style="height:400px; object-fit:cover;">
+                    <img src="{{ product.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;">
                     {% endif %}
 
                     <div class="card-body">
