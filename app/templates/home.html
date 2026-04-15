@@ -96,16 +96,26 @@
     <script>
         let allProducts = [];
 
-        // ✅ FIXED API URL
-        fetch("http://127.0.0.1:8000/products/")
-            .then(res => res.json())
-            .then(data => {
-                allProducts = data;
-                displayProducts(data);
-            })
-            .catch(err => console.log("API Error:", err));
+        // ✅ LOAD DATA FROM DJANGO API
+        function loadProducts(query = "") {
 
-        // DISPLAY PRODUCTS
+            let url = "http://127.0.0.1:8000/products/";
+
+            // agar search ho to backend filter use karo
+            if (query) {
+                url += "?search=" + query;
+            }
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    allProducts = data;
+                    displayProducts(data);
+                })
+                .catch(err => console.log("API Error:", err));
+        }
+
+        // SHOW PRODUCTS
         function displayProducts(products) {
             let container = document.getElementById("product-list");
             container.innerHTML = "";
@@ -140,16 +150,20 @@
             });
         }
 
-        // SEARCH (SAFE VERSION)
+        // 🔥 SEARCH (NOW USING BACKEND + FRONTEND HYBRID)
         document.getElementById("search").addEventListener("input", function () {
-            let value = this.value.toLowerCase();
+            let value = this.value.trim();
 
-            let filtered = allProducts.filter(p =>
-                (p.name || "").toLowerCase().includes(value)
-            );
-
-            displayProducts(filtered);
+            // agar search box empty ho to all products reload
+            if (value === "") {
+                loadProducts();
+            } else {
+                loadProducts(value); // backend search
+            }
         });
+
+        // INITIAL LOAD
+        loadProducts();
     </script>
 
 </body>
