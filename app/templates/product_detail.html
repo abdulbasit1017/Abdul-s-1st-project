@@ -1,23 +1,66 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 
-<div class="row">
+<div class="container mt-4">
 
-    <div class="col-md-6">
-        <img src="{{ product.image.url }}" class="img-fluid">
-    </div>
+    <div class="row">
 
-    <div class="col-md-6">
-        <h2>{{ product.name }}</h2>
-        <p>{{ product.description }}</p>
-        <h4>Rs {{ product.price }}</h4>
+        <!-- PRODUCT IMAGE -->
+        <div class="col-md-6">
+            <img src="{{ product.image.url }}" class="img-fluid rounded shadow">
+        </div>
 
-        <button class="btn btn-success" data-id="{{ product.id }}" onclick="addToCart(this)">
-            Add to Cart
-        </button>
+        <!-- PRODUCT DETAILS -->
+        <div class="col-md-6">
+            <h2>{{ product.name }}</h2>
+
+            <p class="text-muted">
+                {{ product.description }}
+            </p>
+
+            <h4 class="text-success">
+                Rs {{ product.price }}
+            </h4>
+
+            <!-- IMPORTANT: data attributes (future safe) -->
+            <button class="btn btn-success mt-3" onclick="addToCart('{{ product.id }}')">
+                Add to Cart
+            </button>
+        </div>
+
     </div>
 
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    function addToCart(id) {
+
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        let existing = cart.find(item => item.id == id);
+
+        if (existing) {
+            existing.qty += 1;
+        } else {
+            cart.push({
+                id: id,
+                name: "{{ product.name|escapejs }}",
+                price: parseFloat("{{ product.price }}"),
+                qty: 1
+            });
+        }
+
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        alert("Product added to cart!");
+    }
+</script>
 
 {% endblock %}
