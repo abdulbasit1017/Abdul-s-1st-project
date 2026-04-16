@@ -2,10 +2,85 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate
 
 from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer
 
+# =========================
+# 🟢 For Signup
+# =========================
+class SignupView(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response({"error": "Username and password both are required"}, status=400)
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "User already exists"}, status=400)
+
+        user = User.objects.create(
+            username=username,
+            password=make_password(password)  # 🔐 password hashed
+        )
+
+        return Response({"message": "User created successfully"})
+    
+# =========================
+# 🟢 For Login
+# =========================
+
+class LoginView(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            request.session['user_id'] = user.id
+            return Response({"message": "Login successful"})
+        else:
+            return Response({"error": "Invalid credentials"}, status=400)
+        
+        
+# =========================
+# 🟢 For Logout
+# =========================
+        
+class LogoutView(APIView):
+    def post(self, request):
+        request.session.flush()
+        return Response({"message": "Logged out successfully"})
+    
+# ==========================
+# 🟢 For Checking UserLists
+# ==========================
+
+class UsersListView(APIView):
+    def get(self, request):
+        if not request.session.get('user_id'):
+            return Response({"error": "Login required"}, status=403)
+        users = User.objects.all().values('id', 'username')
+        return Response(users)
+    
+    
+
+# ========================
+# 🟢 For Deletion
+# ========================
+
+class DeleteUserView(APIView):
+    def delete(self, request, id):
+        user = User.objects.get(id=id)
+        user.delete()
+        return Response({"message": "User deleted"})
+
+        
 
 # =========================
 # 🟢 FRONTEND VIEWS

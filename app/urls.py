@@ -1,12 +1,5 @@
 from django.urls import path
-from .views import (
-    ProductAPI,
-    CategoryAPI,
-    home_page,
-    category_page,
-    product_detail,
-    cart_page 
-)
+from .views import (ProductAPI,CategoryAPI,home_page,category_page,product_detail,cart_page,SignupView, LoginView, LogoutView,UsersListView,DeleteUserView)
 
 urlpatterns = [
 
@@ -32,6 +25,12 @@ urlpatterns = [
     # =========================
     # 🔵 API ROUTES
     # =========================
+
+    path('api/signup/', SignupView.as_view()),
+    path('api/login/', LoginView.as_view()),
+    path('api/logout/', LogoutView.as_view()),
+    path('api/users/', UsersListView.as_view()),
+    path('api/users/<int:id>/', DeleteUserView.as_view()),
 
     path('api/products/', ProductAPI.as_view(), name='products_api'),
     path('api/products/<int:id>/', ProductAPI.as_view(), name='product_detail_api'),
