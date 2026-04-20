@@ -1,5 +1,11 @@
 from django.urls import path
-from .views import (ProductAPI,CategoryAPI,home_page,category_page,product_detail,cart_page,SignupView, LoginView, LogoutView,UsersListView,DeleteUserView)
+from .views import (
+    ProductAPI, CategoryAPI,
+    home_page, category_page, category_list,
+    product_detail, cart_page,
+    SignupView, LoginView, LogoutView,
+    UsersListView, DeleteUserView
+)
 
 urlpatterns = [
 
@@ -7,20 +13,15 @@ urlpatterns = [
     # 🟢 FRONTEND ROUTES
     # =========================
 
-    # Home = products list
     path('', home_page, name='home'),
-
-    # OPTIONAL: agar /products/ bhi same page dikhana hai
     path('products/', home_page, name='products_page'),
 
-    # ✅ PRODUCT DETAIL (IMPORTANT)
     path('product/<int:pk>/', product_detail, name='product_detail'),
 
-    # Category page
+    path('categories/', category_list, name='category_list'),
     path('category/<slug:slug>/', category_page, name='category_page'),
 
     path('cart/', cart_page, name='cart_page'),
-
 
     # =========================
     # 🔵 API ROUTES
@@ -29,13 +30,14 @@ urlpatterns = [
     path('api/signup/', SignupView.as_view()),
     path('api/login/', LoginView.as_view()),
     path('api/logout/', LogoutView.as_view()),
+
     path('api/users/', UsersListView.as_view()),
     path('api/users/<int:id>/', DeleteUserView.as_view()),
 
-    path('api/products/', ProductAPI.as_view(), name='products_api'),
-    path('api/products/<int:id>/', ProductAPI.as_view(), name='product_detail_api'),
+    path('api/products/', ProductAPI.as_view()),
+    path('api/products/<int:id>/', ProductAPI.as_view()),
 
-    path('api/categories/', CategoryAPI.as_view(), name='categories_api'),
-    path('api/categories/<int:id>/', CategoryAPI.as_view(), name='category_detail_api'),
-    path('api/categories/slug/<slug:slug>/', CategoryAPI.as_view(), name='category_by_slug'),
+    path('api/categories/', CategoryAPI.as_view()),
+    path('api/categories/<int:id>/', CategoryAPI.as_view()),
+    path('api/categories/slug/<slug:slug>/', CategoryAPI.as_view()),
 ]
