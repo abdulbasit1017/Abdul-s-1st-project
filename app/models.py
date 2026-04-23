@@ -1,5 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
+# from django.contrib.auth import get_user_model
+
+# User = get_user_model()
 
 
 class Category(models.Model):
@@ -33,3 +36,12 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+    
+class OTP(models.Model):
+    # user = models.ForeignKey(User,on_delete=models.CASCADE)
+    email = models.EmailField()
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email

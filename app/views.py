@@ -6,8 +6,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 
-from .models import Product, Category
-from .serializers import ProductSerializer, CategorySerializer
+from .models import Product, Category, OTP
+from .serializers import ProductSerializer, CategorySerializer, MyTokenSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .utils import generate_otp
+from django.utils import timezone
+from datetime import timedelta
+
+
 
 
 # =========================
@@ -40,7 +46,7 @@ class LoginView(APIView):
 
         user = authenticate(username=username, password=password)
 
-        if user:
+        if user is not None:
             request.session['user_id'] = user.id
             return Response({"message": "Login successful"})
 
@@ -67,6 +73,9 @@ class DeleteUserView(APIView):
         user = get_object_or_404(User, id=id)
         user.delete()
         return Response({"message": "User deleted"})
+    
+class MyTokenView(TokenObtainPairView):
+    serializer_class = MyTokenSerializer
 
 
 # =========================
@@ -128,7 +137,7 @@ class CategoryAPI(APIView):
     def get(self, request, id=None, slug=None):
 
         # Single category with products (IMPORTANT FIX)
-        if slug:
+        if slug is not None:
             category = get_object_or_404(Category, slug=slug)
 
             products = Product.objects.filter(category=category)
@@ -149,7 +158,7 @@ class CategoryAPI(APIView):
                 ]
             })
 
-        if id:
+        if id is not None:
             category = get_object_or_404(Category, id=id)
             return Response(CategorySerializer(category).data)
 
@@ -197,7 +206,7 @@ class ProductAPI(APIView):
 
     def get(self, request, id=None):
 
-        if id:
+        if id is not None:
             product = get_object_or_404(Product, id=id)
             return Response(ProductSerializer(product).data)
 
@@ -249,3 +258,44 @@ class ProductAPI(APIView):
         product = get_object_or_404(Product, id=id)
         product.delete()
         return Response({"message": "Product deleted"})
+    
+
+# OTP settings
+class SendOTPView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+
+        if not email:
+            return Response({"error": "Email required"}, status=400)
+
+        otp = generate_otp()
+        # user = User.objects.get(email=email)  # 👈 yahan
+
+        # OTP.objects.create(
+        #     user=user,
+        #     otp=otp
+        # )
+
+        OTP.objects.filter(email=email).delete()
+        OTP.objects.create(email=email, otp=otp)
+
+        print(otp)
+
+        return Response({"message": "OTP sent"})
+    
+class VerifyOTPView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        otp = request.data.get("otp")
+
+        try:
+            record = OTP.objects.filter(email=email, otp=otp).latest('created_at')
+
+            # check expiry (5 minutes)
+            if timezone.now() > record.created_at + timedelta(minutes=5):
+                return Response({"error": "OTP expired"})
+
+            return Response({"message": "OTP verified"})
+
+        except OTP.DoesNotExist:
+            return Response({"error": "Invalid OTP"})
