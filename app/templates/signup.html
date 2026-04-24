@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Signup</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="card p-4 mx-auto" style="max-width: 400px;">
+            <h3 class="text-center">Signup</h3>
+
+            <div id="message"></div>
+
+            <form id="signupForm">
+                <input type="text" id="username" placeholder="Username" class="form-control mb-2" required>
+                <input type="password" id="password" placeholder="Password" class="form-control mb-2" required>
+
+                <button id="btn" class="btn btn-primary w-100">Signup</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("signupForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            let btn = document.getElementById("btn");
+            let msg = document.getElementById("message");
+
+            // 🔥 loading state
+            btn.disabled = true;
+            btn.innerText = "Signing up...";
+
+            fetch("/api/signup/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: document.getElementById("username").value,
+                    password: document.getElementById("password").value
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.error) {
+                        msg.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                        btn.disabled = false;
+                        btn.innerText = "Signup";
+                    }
+                    else {
+                        msg.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+
+                        // 🔥 AUTO REDIRECT TO HOME
+                        setTimeout(() => {
+                            let next = localStorage.getItem("next_page") || "/";
+                            window.location.href = next;
+                            localStorage.removeItem("next_page");
+                        }, 800);
+                    }
+                })
+                .catch(() => {
+                    msg.innerHTML = `<div class="alert alert-danger">Something went wrong</div>`;
+                    btn.disabled = false;
+                    btn.innerText = "Signup";
+                });
+        });
+    </script>
+
+</body>
+
+</html>

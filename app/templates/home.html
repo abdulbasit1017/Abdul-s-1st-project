@@ -10,6 +10,12 @@
 
 <!-- PRODUCTS -->
 <div class="container mt-5">
+
+    <!-- SEARCH BOX (only one system) -->
+    <div class="mb-3">
+
+    </div>
+
     <div class="row" id="product-list"></div>
 </div>
 
@@ -46,45 +52,38 @@
         }
 
         products.forEach(p => {
-
             container.innerHTML += `
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card p-2">
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card p-2">
 
-                    <!-- IMAGE -->
-                    ${p.image ? `
-                        <img src="${p.image}" class="img-fluid mb-2" />
-                    ` : ""}
+                ${p.image ? `
+                    <img src="${p.image}" class="img-fluid mb-2" />
+                ` : ""}
 
-                    <!-- TITLE -->
-                    <h5>${p.name || p.title || "No Name"}</h5>
+                <h5>${p.name || p.title || "No Name"}</h5>
 
-                    <!-- DESCRIPTION -->
-                    <p class="text-muted">
-                        ${(p.description || "").slice(0, 80)}
-                    </p>
+                <p class="text-muted">
+                    ${(p.description || "").slice(0, 80)}
+                </p>
 
-                    <!-- PRICE -->
-                    <h6 class="text-success">Rs ${p.price || 0}</h6>
+                <h6 class="text-success">Rs ${p.price || 0}</h6>
 
-                    <!-- BUTTONS -->
-                    <a href="/product/${p.id}/" class="btn btn-primary w-100 mt-2">
-                        View Detail
-                    </a>
+                <a href="/product/${p.id}/" class="btn btn-primary w-100 mt-2">
+                    View Detail
+                </a>
 
-                    <button onclick="addToCart(${p.id})" class="btn btn-success w-100 mt-2">
-                        Add to Cart
-                    </button>
+                <button onclick="addToCart(${p.id})" class="btn btn-success w-100 mt-2">
+                    Add to Cart
+                </button>
 
-                </div>
             </div>
+        </div>
         `;
         });
     }
 
-    // ADD TO CART FUNCTION
+    // CART
     function addToCart(id) {
-
         fetch(`/api/products/${id}/`)
             .then(res => res.json())
             .then(product => {
@@ -110,18 +109,24 @@
             });
     }
 
-    // SEARCH
+    // 🔥 SEARCH (FIXED SINGLE SYSTEM)
     document.addEventListener("DOMContentLoaded", function () {
+
         const searchBox = document.getElementById("search");
 
-        if (searchBox) {
-            searchBox.addEventListener("input", function () {
-                let value = this.value.trim();
-                loadProducts(value);
-            });
-        }
+        let timeout = null;
 
-        // INITIAL LOAD
+        searchBox.addEventListener("input", function () {
+
+            clearTimeout(timeout);
+
+            let value = this.value.trim();
+
+            timeout = setTimeout(() => {
+                loadProducts(value);
+            }, 300); // debounce
+        });
+
         loadProducts();
     });
 </script>
