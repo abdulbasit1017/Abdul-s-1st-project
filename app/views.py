@@ -13,7 +13,7 @@ from .utils import generate_otp
 
 
 # =========================
-# 🟢 AUTH (SIGNUP / LOGIN / LOGOUT)
+#  AUTH (SIGNUP / LOGIN / LOGOUT)
 # =========================
 
 class SignupView(APIView):
@@ -95,7 +95,7 @@ class MyTokenView(TokenObtainPairView):
 
 
 # =========================
-# 🟢 FRONTEND VIEWS
+#  FRONTEND VIEWS
 # =========================
 
 def home_page(request):
@@ -148,7 +148,7 @@ def product_detail(request, pk):
 
 
 # =========================
-# 🟡 CATEGORY API
+#  CATEGORY API
 # =========================
 
 class CategoryAPI(APIView):
@@ -216,7 +216,7 @@ class CategoryAPI(APIView):
 
 
 # =========================
-# 🟡 PRODUCT API
+#  PRODUCT API
 # =========================
 
 class ProductAPI(APIView):
@@ -272,7 +272,7 @@ class ProductAPI(APIView):
         return Response({"message": "Product deleted"})
 
 # =========================
-# 🟠 OTP SYSTEM
+#  OTP SYSTEM
 # =========================
 
 class SendOTPView(APIView):

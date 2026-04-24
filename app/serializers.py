@@ -25,7 +25,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# ✅ YE ALAG CLASS HONA CHAHIYE (IMPORTANT)
+#  YE ALAG CLASS HONA CHAHIYE (IMPORTANT)
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

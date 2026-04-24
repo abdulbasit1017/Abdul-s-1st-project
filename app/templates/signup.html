@@ -31,7 +31,7 @@
             let btn = document.getElementById("btn");
             let msg = document.getElementById("message");
 
-            // 🔥 loading state
+            //  loading state
             btn.disabled = true;
             btn.innerText = "Signing up...";
 
@@ -56,7 +56,7 @@
                     else {
                         msg.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
 
-                        // 🔥 AUTO REDIRECT TO HOME
+                        //  AUTO REDIRECT TO HOME
                         setTimeout(() => {
                             let next = localStorage.getItem("next_page") || "/";
                             window.location.href = next;

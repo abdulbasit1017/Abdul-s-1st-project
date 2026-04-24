@@ -22,7 +22,7 @@ from .views import (
 urlpatterns = [
 
     # =========================
-    # 🟢 FRONTEND ROUTES
+    #  FRONTEND ROUTES
     # =========================
 
     path('', home_page, name='home'),
@@ -43,7 +43,7 @@ urlpatterns = [
 
 
     # =========================
-    # 🔵 AUTH API ROUTES
+    #  AUTH API ROUTES
     # =========================
 
     path('api/signup/', SignupView.as_view()),
@@ -55,7 +55,7 @@ urlpatterns = [
 
 
     # =========================
-    # 🟡 OTP ROUTES
+    #  OTP ROUTES
     # =========================
 
     path('api/send-otp/', SendOTPView.as_view()),
@@ -71,7 +71,7 @@ urlpatterns = [
 
 
     # =========================
-    # 🟠 CATEGORY API
+    #  CATEGORY API
     # =========================
 
     path('api/categories/', CategoryAPI.as_view()),
@@ -80,7 +80,7 @@ urlpatterns = [
 
 
     # =========================
-    # 🔐 JWT AUTH (OPTIONAL)
+    #  JWT AUTH (OPTIONAL)
     # =========================
 
     path('api/token/', MyTokenView.as_view(), name='token_obtain_pair'),

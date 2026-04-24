@@ -23,5 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('app.urls')),
 ]
-# 👇 YE LINE ADD KARO (IMPORTANT)
+#  YE LINE (IMPORTANT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
