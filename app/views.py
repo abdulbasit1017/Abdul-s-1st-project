@@ -1,19 +1,33 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
+
+from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
+from rest_framework import filters
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+import requests
+import urllib.parse
+
+# ❌ Google Auth removed (commented)
+# from google.oauth2 import id_token
+# from google.auth.transport import requests as google_requests
 
 from .models import Product, Category, OTP
 from .serializers import ProductSerializer, CategorySerializer, MyTokenSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
 from .utils import generate_otp
+from django.core.mail import send_mail
 
 
 # =========================
-#  AUTH (SIGNUP / LOGIN / LOGOUT)
+# AUTH SYSTEM
 # =========================
 
 class SignupView(APIView):
@@ -32,16 +46,12 @@ class SignupView(APIView):
             password=make_password(password)
         )
 
-        # AUTO LOGIN
         request.session['user_id'] = user.id
-
         return Response({"message": "Signup successful"})
 
 
 def signup_page(request):
     return render(request, "signup.html")
-
-
 
 
 class LoginView(APIView):
@@ -61,9 +71,9 @@ class LoginView(APIView):
             return Response({"error": "Invalid password"}, status=400)
 
         request.session['user_id'] = user.id
-
         return Response({"message": "Login successful"})
-    
+
+
 def login_page(request):
     return render(request, "login.html")
 
@@ -85,6 +95,9 @@ class UsersListView(APIView):
 
 class DeleteUserView(APIView):
     def delete(self, request, id):
+        if not request.session.get('user_id'):
+            return Response({"error": "Unauthorized"}, status=403)
+
         user = get_object_or_404(User, id=id)
         user.delete()
         return Response({"message": "User deleted"})
@@ -95,13 +108,10 @@ class MyTokenView(TokenObtainPairView):
 
 
 # =========================
-#  FRONTEND VIEWS
+# FRONTEND PAGES
 # =========================
 
 def home_page(request):
-    categories = Category.objects.all()
-    return render(request, "home.html", {"categories": categories})
-
     categories = Category.objects.all()
     return render(request, "home.html", {"categories": categories})
 
@@ -117,7 +127,6 @@ def category_list(request):
 
 def category_page(request, slug):
     category = get_object_or_404(Category, slug=slug)
-
     products = Product.objects.filter(category=category)
 
     search = request.GET.get('search')
@@ -148,7 +157,7 @@ def product_detail(request, pk):
 
 
 # =========================
-#  CATEGORY API
+# CATEGORY API
 # =========================
 
 class CategoryAPI(APIView):
@@ -192,21 +201,17 @@ class CategoryAPI(APIView):
     def put(self, request, id):
         category = get_object_or_404(Category, id=id)
         serializer = CategorySerializer(category, data=request.data)
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-
         return Response(serializer.errors, status=400)
 
     def patch(self, request, id):
         category = get_object_or_404(Category, id=id)
         serializer = CategorySerializer(category, data=request.data, partial=True)
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-
         return Response(serializer.errors, status=400)
 
     def delete(self, request, id):
@@ -216,24 +221,21 @@ class CategoryAPI(APIView):
 
 
 # =========================
-#  PRODUCT API
+# PRODUCT API
 # =========================
 
 class ProductAPI(APIView):
+    permission_classes = [AllowAny]
 
     def get(self, request, id=None):
 
-        # SINGLE PRODUCT
-        if id is not None:
+        if id:
             product = get_object_or_404(Product, id=id)
             return Response(ProductSerializer(product).data)
 
-        # ALL PRODUCTS
         products = Product.objects.all()
 
-        #  FIXED SEARCH (title instead of name)
         search = request.GET.get('search')
-
         if search:
             products = products.filter(title__icontains=search)
 
@@ -249,21 +251,17 @@ class ProductAPI(APIView):
     def put(self, request, id):
         product = get_object_or_404(Product, id=id)
         serializer = ProductSerializer(product, data=request.data)
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-
         return Response(serializer.errors, status=400)
 
     def patch(self, request, id):
         product = get_object_or_404(Product, id=id)
         serializer = ProductSerializer(product, data=request.data, partial=True)
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-
         return Response(serializer.errors, status=400)
 
     def delete(self, request, id):
@@ -271,8 +269,21 @@ class ProductAPI(APIView):
         product.delete()
         return Response({"message": "Product deleted"})
 
+
 # =========================
-#  OTP SYSTEM
+# PRODUCT SEARCH API
+# =========================
+
+class ProductSearchAPI(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title']
+
+
+# =========================
+# OTP SYSTEM
 # =========================
 
 class SendOTPView(APIView):
@@ -287,7 +298,13 @@ class SendOTPView(APIView):
         OTP.objects.filter(email=email).delete()
         OTP.objects.create(email=email, otp=otp)
 
-        print("OTP:", otp)
+        send_mail(
+            'Your OTP Code',
+            f'Your OTP is {otp}',
+            'your_email@gmail.com',
+            [email],
+            fail_silently=False,
+        )
 
         return Response({"message": "OTP sent"})
 
@@ -307,3 +324,86 @@ class VerifyOTPView(APIView):
 
         except OTP.DoesNotExist:
             return Response({"error": "Invalid OTP"}, status=400)
+
+
+# =========================
+# GOOGLE AUTH (FINAL FIXED - DJANGO TEMPLATE MODE)
+# =========================
+
+# class GoogleLoginView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def get(self, request):
+#         base_url = "https://accounts.google.com/o/oauth2/v2/auth"
+
+#         params = {
+#             "client_id": settings.GOOGLE_CLIENT_ID,
+#             "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+#             "response_type": "code",
+#             "scope": "openid email profile",
+#             "access_type": "offline",
+#             "prompt": "consent"
+#         }
+
+#         return redirect(f"{base_url}?{urllib.parse.urlencode(params)}")
+
+
+# class GoogleCallbackAPIView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def get(self, request):
+#         code = request.GET.get('code')
+
+#         if not code:
+#             return redirect("/?error=code_missing")
+
+#         data = {
+#             'code': code,
+#             'client_id': settings.GOOGLE_CLIENT_ID,
+#             'client_secret': settings.GOOGLE_CLIENT_SECRET,
+#             'redirect_uri': settings.GOOGLE_REDIRECT_URI,
+#             'grant_type': 'authorization_code'
+#         }
+
+#         token_response = requests.post(
+#             'https://oauth2.googleapis.com/token',
+#             data=data
+#         )
+
+#         if token_response.status_code != 200:
+#             return redirect("/?error=token_failed")
+
+#         token_data = token_response.json()
+#         id_token_value = token_data.get('id_token')
+
+#         if not id_token_value:
+#             return redirect("/?error=no_id_token")
+
+#         try:
+#             idinfo = id_token.verify_oauth2_token(
+#                 id_token_value,
+#                 google_requests.Request(),
+#                 settings.GOOGLE_CLIENT_ID
+#             )
+
+#             email = idinfo.get('email')
+
+#             if not idinfo.get('email_verified'):
+#                 return redirect("/?error=email_not_verified")
+
+#             user, created = User.objects.get_or_create(username=email)
+#             user.email = email
+#             user.first_name = idinfo.get('given_name', '')
+#             user.last_name = idinfo.get('family_name', '')
+#             user.save()
+
+#             request.session['user_id'] = user.id
+
+#             refresh = RefreshToken.for_user(user)
+#             access = str(refresh.access_token)
+
+#             # 👉 IMPORTANT: Django template redirect
+#             return redirect(f"/?access={access}")
+
+#         except ValueError:
+#             return redirect("/?error=invalid_token")

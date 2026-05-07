@@ -16,7 +16,7 @@ from .views import (
     SendOTPView, VerifyOTPView,
 
     # JWT
-    MyTokenView,
+    MyTokenView
 )
 
 urlpatterns = [
@@ -85,4 +85,6 @@ urlpatterns = [
 
     path('api/token/', MyTokenView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('auth/google/', GoogleLoginView.as_view(), name='google_login'),
+    # path('auth/google/callback/', GoogleCallbackAPIView.as_view(), name='google-callback'),
 ]

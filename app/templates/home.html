@@ -2,28 +2,46 @@
 
 {% block content %}
 
-<!-- HERO -->
-<div class="hero">
+<!-- =========================
+    AUTH HANDLER (GOOGLE LOGIN)
+========================= -->
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const access = params.get("access");
+
+    if (access) {
+        localStorage.setItem("access", access);
+
+        // clean URL
+        window.history.replaceState({}, document.title, "/");
+    }
+</script>
+
+<!-- =========================
+    HERO SECTION
+========================= -->
+<div class="hero text-center py-5 bg-light">
     <h1>Welcome to eStore</h1>
     <p>Find the best products at amazing prices</p>
 </div>
 
-<!-- PRODUCTS -->
+<!-- =========================
+    PRODUCTS SECTION
+========================= -->
 <div class="container mt-5">
-
-    <!-- SEARCH BOX (only one system) -->
-    <div class="mb-3">
-
-    </div>
-
     <div class="row" id="product-list"></div>
 </div>
 
-<!-- SCRIPT -->
+<!-- =========================
+    SCRIPT
+========================= -->
 <script>
+
     let allProducts = [];
 
-    // LOAD PRODUCTS
+    // =========================
+    // LOAD PRODUCTS (JWT READY)
+    // =========================
     function loadProducts(query = "") {
 
         let url = "/api/products/";
@@ -32,7 +50,11 @@
             url += "?search=" + query;
         }
 
-        fetch(url)
+        fetch(url, {
+            headers: {
+                "Authorization": "Bearer " + (localStorage.getItem("access") || "")
+            }
+        })
             .then(res => res.json())
             .then(data => {
                 allProducts = data;
@@ -41,8 +63,11 @@
             .catch(err => console.log("API Error:", err));
     }
 
+    // =========================
     // DISPLAY PRODUCTS
+    // =========================
     function displayProducts(products) {
+
         let container = document.getElementById("product-list");
         container.innerHTML = "";
 
@@ -54,11 +79,9 @@
         products.forEach(p => {
             container.innerHTML += `
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-            <div class="card p-2">
+            <div class="card p-2 shadow-sm">
 
-                ${p.image ? `
-                    <img src="${p.image}" class="img-fluid mb-2" />
-                ` : ""}
+                ${p.image ? `<img src="${p.image}" class="img-fluid mb-2" />` : ""}
 
                 <h5>${p.name || p.title || "No Name"}</h5>
 
@@ -82,8 +105,11 @@
         });
     }
 
-    // CART
+    // =========================
+    // ADD TO CART
+    // =========================
     function addToCart(id) {
+
         fetch(`/api/products/${id}/`)
             .then(res => res.json())
             .then(product => {
@@ -109,26 +135,32 @@
             });
     }
 
-    // 🔥 SEARCH (FIXED SINGLE SYSTEM)
+    // =========================
+    // SEARCH (DEBOUNCE)
+    // =========================
     document.addEventListener("DOMContentLoaded", function () {
 
         const searchBox = document.getElementById("search");
 
-        let timeout = null;
+        if (searchBox) {
 
-        searchBox.addEventListener("input", function () {
+            let timeout = null;
 
-            clearTimeout(timeout);
+            searchBox.addEventListener("input", function () {
 
-            let value = this.value.trim();
+                clearTimeout(timeout);
 
-            timeout = setTimeout(() => {
-                loadProducts(value);
-            }, 300); // debounce
-        });
+                let value = this.value.trim();
+
+                timeout = setTimeout(() => {
+                    loadProducts(value);
+                }, 300);
+            });
+        }
 
         loadProducts();
     });
+
 </script>
 
 {% endblock %}
