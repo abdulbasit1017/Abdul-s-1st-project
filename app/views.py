@@ -10,11 +10,11 @@ from rest_framework.generics import ListAPIView
 from rest_framework import filters
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
+# from rest_framework_simplejwt.views import TokenObtainPairView
+# from rest_framework_simplejwt.tokens import RefreshToken
 
-import requests
-import urllib.parse
+# import requests
+# import urllib.parse
 
 # ❌ Google Auth removed (commented)
 # from google.oauth2 import id_token
@@ -30,81 +30,81 @@ from django.core.mail import send_mail
 # AUTH SYSTEM
 # =========================
 
-class SignupView(APIView):
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
+# class SignupView(APIView):
+#     def post(self, request):
+#         username = request.data.get("username")
+#         password = request.data.get("password")
 
-        if not username or not password:
-            return Response({"error": "Username and password required"}, status=400)
+#         if not username or not password:
+#             return Response({"error": "Username and password required"}, status=400)
 
-        if User.objects.filter(username=username).exists():
-            return Response({"error": "User already exists"}, status=400)
+#         if User.objects.filter(username=username).exists():
+#             return Response({"error": "User already exists"}, status=400)
 
-        user = User.objects.create(
-            username=username,
-            password=make_password(password)
-        )
+#         user = User.objects.create(
+#             username=username,
+#             password=make_password(password)
+#         )
 
-        request.session['user_id'] = user.id
-        return Response({"message": "Signup successful"})
-
-
-def signup_page(request):
-    return render(request, "signup.html")
+#         request.session['user_id'] = user.id
+#         return Response({"message": "Signup successful"})
 
 
-class LoginView(APIView):
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        if not username or not password:
-            return Response({"error": "Username and password required"}, status=400)
-
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=404)
-
-        if not check_password(password, user.password):
-            return Response({"error": "Invalid password"}, status=400)
-
-        request.session['user_id'] = user.id
-        return Response({"message": "Login successful"})
+# def signup_page(request):
+#     return render(request, "signup.html")
 
 
-def login_page(request):
-    return render(request, "login.html")
+# class LoginView(APIView):
+#     def post(self, request):
+#         username = request.data.get("username")
+#         password = request.data.get("password")
+
+#         if not username or not password:
+#             return Response({"error": "Username and password required"}, status=400)
+
+#         try:
+#             user = User.objects.get(username=username)
+#         except User.DoesNotExist:
+#             return Response({"error": "User not found"}, status=404)
+
+#         if not check_password(password, user.password):
+#             return Response({"error": "Invalid password"}, status=400)
+
+#         request.session['user_id'] = user.id
+#         return Response({"message": "Login successful"})
 
 
-class LogoutView(APIView):
-    def post(self, request):
-        request.session.flush()
-        return Response({"message": "Logged out"})
+# def login_page(request):
+#     return render(request, "login.html")
 
 
-class UsersListView(APIView):
-    def get(self, request):
-        if not request.session.get('user_id'):
-            return Response({"error": "Login required"}, status=403)
-
-        users = User.objects.all().values('id', 'username')
-        return Response(users)
+# class LogoutView(APIView):
+#     def post(self, request):
+#         request.session.flush()
+#         return Response({"message": "Logged out"})
 
 
-class DeleteUserView(APIView):
-    def delete(self, request, id):
-        if not request.session.get('user_id'):
-            return Response({"error": "Unauthorized"}, status=403)
+# class UsersListView(APIView):
+#     def get(self, request):
+#         if not request.session.get('user_id'):
+#             return Response({"error": "Login required"}, status=403)
 
-        user = get_object_or_404(User, id=id)
-        user.delete()
-        return Response({"message": "User deleted"})
+#         users = User.objects.all().values('id', 'username')
+#         return Response(users)
 
 
-class MyTokenView(TokenObtainPairView):
-    serializer_class = MyTokenSerializer
+# class DeleteUserView(APIView):
+#     def delete(self, request, id):
+#         if not request.session.get('user_id'):
+#             return Response({"error": "Unauthorized"}, status=403)
+
+#         user = get_object_or_404(User, id=id)
+#         user.delete()
+#         return Response({"message": "User deleted"})
+
+
+# class MyTokenView(TokenObtainPairView):
+#     serializer_class = MyTokenSerializer
 
 
 # =========================
@@ -161,6 +161,7 @@ def product_detail(request, pk):
 # =========================
 
 class CategoryAPI(APIView):
+    permission_classes = [AllowAny]
 
     def get(self, request, id=None, slug=None):
 

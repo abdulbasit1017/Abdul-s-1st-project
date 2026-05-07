@@ -135,10 +135,10 @@
                 <!-- AUTH -->
                 <div class="ms-3">
                     {% if request.session.user_id %}
-                    <button onclick="logout()" class="btn btn-danger">Logout</button>
+                    <!-- <button onclick="logout()" class="btn btn-danger">Logout</button> -->
                     {% else %}
-                    <a href="/signup/" class="btn btn-primary me-2">Signup</a>
-                    <a href="/login/" class="btn btn-success me-2">Login</a>
+                    <!-- <a href="/signup/" class="btn btn-primary me-2">Signup</a>
+                    <a href="/login/" class="btn btn-success me-2">Login</a> -->
                     <!-- <a href="/auth/google/" class="btn btn-danger">
                         Login with Google
                     </a> -->
@@ -222,20 +222,20 @@
         }
 
         // LOGOUT
-        function logout() {
-            // ✅ JWT remove
-            localStorage.removeItem("access");
+        // function logout() {
+        //     // ✅ JWT remove
+        //     localStorage.removeItem("access");
 
-            fetch("/api/logout/", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": getCookie('csrftoken')
-                }
-            })
-                .then(() => {
-                    window.location.href = "/login/";
-                });
-        }
+        //     fetch("/api/logout/", {
+        //         method: "POST",
+        //         headers: {
+        //             "X-CSRFToken": getCookie('csrftoken')
+        //         }
+        //     })
+        //         .then(() => {
+        //             window.location.href = "/login/";
+        //         });
+        // }
     </script>
 
 </body>

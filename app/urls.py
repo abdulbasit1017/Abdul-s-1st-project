@@ -6,17 +6,17 @@ from .views import (
     # FRONTEND
     home_page, category_page, category_list,
     product_detail, cart_page,
-    signup_page,login_page,
+    # signup_page,login_page,
 
     # AUTH APIs
-    SignupView, LoginView, LogoutView,
-    UsersListView, DeleteUserView,
+    # SignupView, LoginView, LogoutView,
+    # UsersListView, DeleteUserView,
 
     # OTP
-    SendOTPView, VerifyOTPView,
+    # SendOTPView, VerifyOTPView,
 
     # JWT
-    MyTokenView
+    # MyTokenView
 )
 
 urlpatterns = [
@@ -27,9 +27,9 @@ urlpatterns = [
 
     path('', home_page, name='home'),
 
-    path('signup/', signup_page),
-    path('login/', login_page),
-    path('api/login/', LoginView.as_view()), 
+    # path('signup/', signup_page),
+    # path('login/', login_page),
+    # path('api/login/', LoginView.as_view()), 
 
     path('products/', home_page, name='products_page'),
 
@@ -46,20 +46,20 @@ urlpatterns = [
     #  AUTH API ROUTES
     # =========================
 
-    path('api/signup/', SignupView.as_view()),
-    path('api/login/', LoginView.as_view()),
-    path('api/logout/', LogoutView.as_view()),
+    # path('api/signup/', SignupView.as_view()),
+    # path('api/login/', LoginView.as_view()),
+    # path('api/logout/', LogoutView.as_view()),
 
-    path('api/users/', UsersListView.as_view()),
-    path('api/users/<int:id>/', DeleteUserView.as_view()),
+    # path('api/users/', UsersListView.as_view()),
+    # path('api/users/<int:id>/', DeleteUserView.as_view()),
 
 
     # =========================
     #  OTP ROUTES
     # =========================
 
-    path('api/send-otp/', SendOTPView.as_view()),
-    path('api/verify-otp/', VerifyOTPView.as_view()),
+    # path('api/send-otp/', SendOTPView.as_view()),
+    # path('api/verify-otp/', VerifyOTPView.as_view()),
 
 
     # =========================
@@ -83,7 +83,7 @@ urlpatterns = [
     #  JWT AUTH (OPTIONAL)
     # =========================
 
-    path('api/token/', MyTokenView.as_view(), name='token_obtain_pair'),
+    # path('api/token/', MyTokenView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # path('auth/google/', GoogleLoginView.as_view(), name='google_login'),
     # path('auth/google/callback/', GoogleCallbackAPIView.as_view(), name='google-callback'),
